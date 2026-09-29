@@ -1,25 +1,5 @@
-from django.urls import path
-from . import views
-
-app_name = "lab"
-
-urlpatterns = [
-    path("", views.home, name="home"),
-    path("services/", views.services, name="services"),
-    path("register/", views.register_patient, name="register"),
-    path("login/", views.patient_login, name="login"),
-    path("logout/", views.patient_logout, name="logout"),
-    path("dashboard/", views.patient_dashboard, name="patient_dashboard"),
-    path("profile/", views.patient_profile, name="patient_profile"),
-    path("orders/", views.patient_orders, name="patient_orders"),
-    path("orders/new/", views.create_order, name="create_order"),
-    path("orders/<str:tracking_code>/", views.order_detail, name="order_detail"),
-    path("orders/<str:tracking_code>/payment/", views.payment_checkout, name="payment_checkout"),
-    path("orders/<str:tracking_code>/pdf/", views.download_result_pdf, name="download_result_pdf"),
-    path("appointments/book/", views.book_appointment, name="book_appointment"),
-    path("admin/dashboard/", views.admin_dashboard, name="admin_dashboard"),
-    path("admin/intake/", views.staff_intake, name="staff_intake"),
-    path("orders/<str:tracking_code>/results/", views.enter_results, name="enter_results"),
-    path("orders/<str:tracking_code>/approve/", views.approve_order, name="approve_order"),
-    path("api/tests/", views.api_tests, name="api_tests"),
-]
+pip install Django==5.0
+pip install psycopg
+pip install python-dotenv
+pip install Pillow
+pip install reportlab
