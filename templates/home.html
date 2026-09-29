@@ -1,42 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}خانه | آزمایشگاه مهر{% endblock %}
+{% block title %}جزئیات سفارش | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<div class="hero">
-    <div class="card hero-text">
-        <h1>پیشرفت در تشخیص سریع‌تر، دقیق‌تر و ساده‌تر</h1>
-        <p class="muted">از ثبت‌نام تا دریافت نتیجه، همه‌چیز در یک سامانه‌ی مدرن و امن برای بیماران و تیم آزمایشگاه فراهم است.</p>
-        <div class="inline-actions">
-            <a class="btn" href="{% url 'register' %}">ثبت‌نام بیمار</a>
-            <a class="btn secondary" href="{% url 'services' %}">مشاهده خدمات</a>
-        </div>
-    </div>
-    <div class="card" style="padding: 24px;">
-        <h3>آمار آزمایشگاه</h3>
-        <div class="stats">
-            <div class="stat"><h3>1200+</h3><small>بیمار</small></div>
-            <div class="stat"><h3>35</h3><small>آزمایش</small></div>
-            <div class="stat"><h3>24h</h3><small>دریافت نتیجه</small></div>
-            <div class="stat"><h3>99%</h3><small>رضایت</small></div>
-        </div>
-    </div>
-</div>
+<div class="card" style="padding:22px;">
+    <h2 class="page-title">جزئیات سفارش {{ order.tracking_code }}</h2>
+    <p><strong>بیمار:</strong> {{ order.patient.first_name }} {{ order.patient.last_name }}</p>
+    <p><strong>وضعیت:</strong> {{ order.get_status_display }}</p>
+    <p><strong>نوع سفارش:</strong> {{ order.get_order_type_display }}</p>
+    <p><strong>قیمت کل:</strong> {{ order.total_price }} تومان</p>
+    {% if order.is_paid %}
+        <a class="btn" href="{% url 'download_result_pdf' order.tracking_code %}">دانلود PDF نتیجه</a>
+    {% else %}
+        <a class="btn" href="{% url 'payment_checkout' order.tracking_code %}">پرداخت</a>
+    {% endif %}
 
-<div class="grid">
-    <div class="card service-card">
-        <h3>پذیرش و نوبت‌دهی</h3>
-        <p class="muted">دریافت نوبت آنلاین برای آزمایش‌های مختلف و پیگیری سریع وضعیت.</p>
-    </div>
-    <div class="card service-card">
-        <h3>نمونه‌گیری و بررسی</h3>
-        <p class="muted">ثبت دقیق نمونه، کد رهگیری و بررسی روند انجام تست‌ها.</p>
-    </div>
-    <div class="card service-card">
-        <h3>گزارش‌گیری پزشکی</h3>
-        <p class="muted">ورود نتایج با استانداردهای آزمایشگاهی و تأیید نهایی مسئول فنی.</p>
-    </div>
-    <div class="card service-card">
-        <h3>نتیجه دیجیتال</h3>
-        <p class="muted">دسترسی امن به جواب آزمایش و دانلود PDF در فضای شخصی بیمار.</p>
-    </div>
+    <table>
+        <tr><th>نام آزمایش</th><th>نوع نمونه</th><th>نتیجه</th><th>تأیید</th></tr>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ item.test.name }}</td>
+            <td>{{ item.sample_type }}</td>
+            <td>{% if item.result %}{{ item.result.value }}{% else %}-{% endif %}</td>
+            <td>{% if item.result %}{% if item.result.verified %}تأیید شده{% else %}در انتظار تأیید{% endif %}{% else %}در انتظار نتیجه{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </div>
 {% endblock %}

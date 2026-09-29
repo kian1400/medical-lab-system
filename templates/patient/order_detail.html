@@ -1,22 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}جزئیات سفارش | آزمایشگاه مهر{% endblock %}
+{% block title %}پرداخت | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<div class="card" style="padding:22px;">
-    <h2 class="page-title">جزئیات سفارش {{ order.tracking_code }}</h2>
-    <p><strong>بیمار:</strong> {{ order.patient.first_name }} {{ order.patient.last_name }}</p>
-    <p><strong>وضعیت:</strong> {{ order.get_status_display }}</p>
-    <p><strong>نوع سفارش:</strong> {{ order.get_order_type_display }}</p>
-
-    <table>
-        <tr><th>نام آزمایش</th><th>نوع نمونه</th><th>نتیجه</th><th>تأیید</th></tr>
-        {% for item in order.items.all %}
-        <tr>
-            <td>{{ item.test.name }}</td>
-            <td>{{ item.sample_type }}</td>
-            <td>{% if item.result %}{{ item.result.value }}{% else %}-{% endif %}</td>
-            <td>{% if item.result %}{% if item.result.verified %}تأیید شده{% else %}در انتظار تأیید{% endif %}{% else %}در انتظار نتیجه{% endif %}</td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="card" style="max-width:600px; margin:40px auto; padding:30px;">
+    <h2 class="page-title">پرداخت سفارش</h2>
+    <div class="pay-box">
+        <p><strong>کد رهگیری:</strong> {{ order.tracking_code }}</p>
+        <p><strong>مبلغ قابل پرداخت:</strong> {{ order.total_price }} تومان</p>
+        <p><strong>نوع سفارش:</strong> {{ order.get_order_type_display }}</p>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn" type="submit">تأیید و پرداخت</button>
+    </form>
 </div>
 {% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}ثبت سفارش | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<div class="card" style="max-width:800px; margin:40px auto; padding:30px;">
+    <h2 class="page-title">ثبت سفارش آزمایش</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="two-col">
+            <div>{{ form.order_type.label_tag }} {{ form.order_type }}</div>
+            <div>{{ form.notes.label_tag }} {{ form.notes }}</div>
+        </div>
+        <h3>آزمایش‌های درخواستی</h3>
+        {% for choice in form.tests %}
+            <label>{{ choice.tag }} {{ choice.choice_label }}</label>
+        {% endfor %}
+        <button class="btn" type="submit">ثبت سفارش و ادامه پرداخت</button>
+    </form>
+</div>
+{% endblock %}

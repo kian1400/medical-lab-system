@@ -1,28 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}داشبورد بیمار | آزمایشگاه مهر{% endblock %}
+{% block title %}ورود | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<h2 class="page-title">داشبورد بیمار</h2>
-<div class="stats">
-    <div class="stat"><h3>{{ orders.count }}</h3><small>سفارش</small></div>
-    <div class="stat"><h3>{{ appointments.count }}</h3><small>نوبت فعال</small></div>
-    <div class="stat"><h3>{{ total_spent }}</h3><small>مبلغ پرداختی</small></div>
-    <div class="stat"><h3>{{ patient.age|default:'-' }}</h3><small>سن</small></div>
-</div>
-
-<div class="card" style="padding:20px; margin-top:24px;">
-    <h3>آخرین سفارش‌ها</h3>
-    <table>
-        <tr><th>کد رهگیری</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr>
-        {% for order in recent_orders %}
-        <tr>
-            <td>{{ order.tracking_code }}</td>
-            <td>{{ order.registered_at|date:'Y/m/d' }}</td>
-            <td>{{ order.get_status_display }}</td>
-            <td><a href="{% url 'order_detail' order.tracking_code %}">مشاهده</a></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4">هنوز سفارشی ثبت نشده است.</td></tr>
-        {% endfor %}
-    </table>
+<div class="card" style="max-width: 500px; margin: 40px auto; padding: 30px;">
+    <h2 class="page-title">ورود به سامانه</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="id_username">نام کاربری</label>
+            {{ form.username }}
+        </div>
+        <div>
+            <label for="id_password">رمز عبور</label>
+            {{ form.password }}
+        </div>
+        <button class="btn" type="submit">ورود</button>
+    </form>
+    <p class="muted">هنوز ثبت‌نام نکرده‌اید؟ <a href="{% url 'register' %}">اینجا ثبت‌نام کنید</a></p>
 </div>
 {% endblock %}

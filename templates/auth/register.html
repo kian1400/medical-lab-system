@@ -1,26 +1,23 @@
 {% extends 'base.html' %}
-{% block title %}ثبت‌نام | آزمایشگاه مهر{% endblock %}
+{% block title %}خانه | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 700px; margin: 40px auto; padding: 30px;">
-    <h2 class="page-title">ثبت‌نام بیمار</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div class="two-col">
-            <div>{{ form.first_name.label_tag }} {{ form.first_name }}</div>
-            <div>{{ form.last_name.label_tag }} {{ form.last_name }}</div>
-            <div>{{ form.national_id.label_tag }} {{ form.national_id }}</div>
-            <div>{{ form.phone.label_tag }} {{ form.phone }}</div>
-            <div>{{ form.email.label_tag }} {{ form.email }}</div>
-            <div>{{ form.birth_date.label_tag }} {{ form.birth_date }}</div>
-            <div>{{ form.gender.label_tag }} {{ form.gender }}</div>
-            <div>{{ form.city.label_tag }} {{ form.city }}</div>
+<div class="hero">
+    <div class="card hero-text">
+        <h1>پیشرفت در تشخیص سریع‌تر، دقیق‌تر و ساده‌تر</h1>
+        <p class="muted">از ثبت‌نام تا دریافت نتیجه، همه‌چیز در یک سامانه مدرن و امن برای بیماران و تیم آزمایشگاه فراهم است.</p>
+        <div class="inline-actions">
+            <a class="btn" href="{% url 'register' %}">ثبت‌نام بیمار</a>
+            <a class="btn secondary" href="{% url 'services' %}">مشاهده خدمات</a>
         </div>
-        <div>{{ form.address.label_tag }} {{ form.address }}</div>
-        <div class="two-col">
-            <div>{{ form.password.label_tag }} {{ form.password }}</div>
-            <div>{{ form.password_confirm.label_tag }} {{ form.password_confirm }}</div>
+    </div>
+    <div class="card" style="padding:24px;">
+        <h3>آمار آزمایشگاه</h3>
+        <div class="stats">
+            <div class="stat"><h3>1200+</h3><small>بیمار</small></div>
+            <div class="stat"><h3>35</h3><small>آزمایش</small></div>
+            <div class="stat"><h3>24h</h3><small>دریافت نتیجه</small></div>
+            <div class="stat"><h3>99%</h3><small>رضایت</small></div>
         </div>
-        <button class="btn" type="submit">ثبت‌نام</button>
-    </form>
+    </div>
 </div>
 {% endblock %}

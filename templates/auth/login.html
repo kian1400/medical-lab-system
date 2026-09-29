@@ -1,20 +1,26 @@
 {% extends 'base.html' %}
-{% block title %}ورود | آزمایشگاه مهر{% endblock %}
+{% block title %}ثبت‌نام | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 40px auto; padding: 30px;">
-    <h2 class="page-title">ورود به سامانه</h2>
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 30px;">
+    <h2 class="page-title">ثبت‌نام بیمار</h2>
     <form method="post">
         {% csrf_token %}
-        <div>
-            <label for="id_username">نام کاربری</label>
-            {{ form.username }}
+        <div class="two-col">
+            <div>{{ form.first_name.label_tag }} {{ form.first_name }}</div>
+            <div>{{ form.last_name.label_tag }} {{ form.last_name }}</div>
+            <div>{{ form.national_id.label_tag }} {{ form.national_id }}</div>
+            <div>{{ form.phone.label_tag }} {{ form.phone }}</div>
+            <div>{{ form.email.label_tag }} {{ form.email }}</div>
+            <div>{{ form.birth_date.label_tag }} {{ form.birth_date }}</div>
+            <div>{{ form.gender.label_tag }} {{ form.gender }}</div>
+            <div>{{ form.city.label_tag }} {{ form.city }}</div>
         </div>
-        <div>
-            <label for="id_password">رمز عبور</label>
-            {{ form.password }}
+        <div>{{ form.address.label_tag }} {{ form.address }}</div>
+        <div class="two-col">
+            <div>{{ form.password.label_tag }} {{ form.password }}</div>
+            <div>{{ form.password_confirm.label_tag }} {{ form.password_confirm }}</div>
         </div>
-        <button class="btn" type="submit">ورود</button>
+        <button class="btn" type="submit">ثبت‌نام</button>
     </form>
-    <p class="muted">هنوز ثبت‌نام نکرده‌اید؟ <a href="{% url 'register' %}">اینجا ثبت‌نام کنید</a></p>
 </div>
 {% endblock %}

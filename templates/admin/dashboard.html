@@ -1,27 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}داشبورد مدیریت | آزمایشگاه مهر{% endblock %}
+{% block title %}سفارش‌ها | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<h2 class="page-title">داشبورد مدیریت</h2>
-<div class="stats">
-    <div class="stat"><h3>{{ orders_today }}</h3><small>پذیرش امروز</small></div>
-    <div class="stat"><h3>{{ pending_approval }}</h3><small>در انتظار تأیید</small></div>
-    <div class="stat"><h3>{{ total_patients }}</h3><small>بیماران</small></div>
-    <div class="stat"><h3>{{ total_revenue }}</h3><small>درآمد کل</small></div>
-</div>
-
-<div class="card" style="padding:20px; margin-top:24px;">
-    <h3>آخرین سفارش‌ها</h3>
+<h2 class="page-title">سوابق سفارش‌ها</h2>
+<div class="card" style="padding:20px;">
     <table>
-        <tr><th>کد رهگیری</th><th>بیمار</th><th>مبلغ</th><th>وضعیت</th></tr>
-        {% for order in recent_orders %}
+        <tr><th>کد رهگیری</th><th>تاریخ</th><th>کل مبلغ</th><th>وضعیت</th><th>جزئیات</th></tr>
+        {% for order in orders %}
         <tr>
             <td>{{ order.tracking_code }}</td>
-            <td>{{ order.patient.first_name }} {{ order.patient.last_name }}</td>
-            <td>{{ order.total_price }}</td>
+            <td>{{ order.registered_at|date:'Y/m/d' }}</td>
+            <td>{{ order.total_price }} تومان</td>
             <td>{{ order.get_status_display }}</td>
+            <td><a href="{% url 'order_detail' order.tracking_code %}">مشاهده</a></td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">سفارشی وجود ندارد.</td></tr>
+        <tr><td colspan="5">هیچ سفارشی موجود نیست.</td></tr>
         {% endfor %}
     </table>
 </div>

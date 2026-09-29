@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}خدمات | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<h2 class="page-title">خدمات آزمایشگاهی</h2>
+{% for category, items in categories.items %}
+    <div class="card" style="padding:20px; margin-bottom:18px;">
+        <h3>{{ category }}</h3>
+        <div class="grid">
+            {% for test in items %}
+                <div class="service-card card">
+                    <h4>{{ test.name }}</h4>
+                    <p class="muted">{{ test.description|default:'توضیحات آزمایش' }}</p>
+                    <p><strong>کد:</strong> {{ test.code }}</p>
+                    <p><strong>قیمت:</strong> {{ test.final_price }} تومان</p>
+                    <p><strong>نوع نمونه:</strong> {{ test.sample_type }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="card" style="padding:20px;">در حال حاضر خدماتی ثبت نشده است.</div>
+{% endfor %}
+{% endblock %}

@@ -1,23 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}پروفایل | آزمایشگاه مهر{% endblock %}
+{% block title %}داشبورد بیمار | آزمایشگاه مهر{% endblock %}
 {% block content %}
-<div class="card" style="padding:30px; max-width:800px; margin:30px auto;">
-    <h2 class="page-title">پروفایل بیمار</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div class="two-col">
-            <div>{{ form.first_name.label_tag }} {{ form.first_name }}</div>
-            <div>{{ form.last_name.label_tag }} {{ form.last_name }}</div>
-            <div>{{ form.birth_date.label_tag }} {{ form.birth_date }}</div>
-            <div>{{ form.gender.label_tag }} {{ form.gender }}</div>
-            <div>{{ form.phone.label_tag }} {{ form.phone }}</div>
-            <div>{{ form.email.label_tag }} {{ form.email }}</div>
-            <div>{{ form.city.label_tag }} {{ form.city }}</div>
-            <div>{{ form.insurance_number.label_tag }} {{ form.insurance_number }}</div>
-        </div>
-        <div>{{ form.address.label_tag }} {{ form.address }}</div>
-        <div>{{ form.emergency_contact.label_tag }} {{ form.emergency_contact }}</div>
-        <button class="btn" type="submit">ذخیره تغییرات</button>
-    </form>
+<h2 class="page-title">داشبورد بیمار</h2>
+<div class="stats">
+    <div class="stat"><h3>{{ orders.count }}</h3><small>سفارش</small></div>
+    <div class="stat"><h3>{{ appointments.count }}</h3><small>نوبت فعال</small></div>
+    <div class="stat"><h3>{{ total_spent|floatformat:0 }}</h3><small>مبلغ پرداختی</small></div>
+    <div class="stat"><h3>{{ patient.age|default:'-' }}</h3><small>سن</small></div>
+</div>
+
+<div class="card" style="padding:20px; margin-top:24px;">
+    <h3>آخرین سفارش‌ها</h3>
+    <table>
+        <tr><th>کد رهگیری</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr>
+        {% for order in recent_orders %}
+        <tr>
+            <td>{{ order.tracking_code }}</td>
+            <td>{{ order.registered_at|date:'Y/m/d' }}</td>
+            <td>{{ order.get_status_display }}</td>
+            <td><a href="{% url 'order_detail' order.tracking_code %}">مشاهده</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">هنوز سفارشی ثبت نشده است.</td></tr>
+        {% endfor %}
+    </table>
 </div>
 {% endblock %}
