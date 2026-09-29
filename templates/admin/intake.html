@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}پذیرش جدید | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<h2 class="page-title">پذیرش جدید</h2>
+<div class="card" style="padding:28px; max-width:900px; margin:20px auto;">
+    <form method="post">
+        {% csrf_token %}
+        <div class="two-col">
+            <div><label>کد ملی</label><input name="national_id" required></div>
+            <div><label>نام</label><input name="first_name" required></div>
+            <div><label>نام خانوادگی</label><input name="last_name" required></div>
+            <div><label>موبایل</label><input name="phone" required></div>
+            <div><label>پزشک درخواست‌کننده</label><input name="physician"></div>
+            <div><label>نوع سفارش</label><select name="order_type"><option value="clinic">کلینیک</option><option value="home">منزل</option></select></div>
+        </div>
+        <div><label>جنسیت</label><select name="gender"><option value="M">مرد</option><option value="F">زن</option><option value="O">سایر</option></select></div>
+        <h3>آزمایش‌های انتخابی</h3>
+        {% for test in tests %}
+            <label><input type="checkbox" name="tests" value="{{ test.pk }}"> {{ test.name }} ({{ test.code }})</label><br>
+        {% empty %}
+            <p class="muted">هیچ آزمایشی تعریف نشده است.</p>
+        {% endfor %}
+        <button class="btn" type="submit" style="margin-top: 18px;">ثبت پذیرش</button>
+    </form>
+</div>
+{% endblock %}

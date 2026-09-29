@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}پروفایل | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<div class="card" style="padding:30px; max-width:800px; margin:30px auto;">
+    <h2 class="page-title">پروفایل بیمار</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="two-col">
+            <div>{{ form.first_name.label_tag }} {{ form.first_name }}</div>
+            <div>{{ form.last_name.label_tag }} {{ form.last_name }}</div>
+            <div>{{ form.birth_date.label_tag }} {{ form.birth_date }}</div>
+            <div>{{ form.gender.label_tag }} {{ form.gender }}</div>
+            <div>{{ form.phone.label_tag }} {{ form.phone }}</div>
+            <div>{{ form.email.label_tag }} {{ form.email }}</div>
+            <div>{{ form.city.label_tag }} {{ form.city }}</div>
+            <div>{{ form.insurance_number.label_tag }} {{ form.insurance_number }}</div>
+        </div>
+        <div>{{ form.address.label_tag }} {{ form.address }}</div>
+        <div>{{ form.emergency_contact.label_tag }} {{ form.emergency_contact }}</div>
+        <button class="btn" type="submit">ذخیره تغییرات</button>
+    </form>
+</div>
+{% endblock %}

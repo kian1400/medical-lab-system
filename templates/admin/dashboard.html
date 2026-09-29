@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}داشبورد مدیریت | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<h2 class="page-title">داشبورد مدیریت</h2>
+<div class="stats">
+    <div class="stat"><h3>{{ orders_today }}</h3><small>پذیرش امروز</small></div>
+    <div class="stat"><h3>{{ pending_approval }}</h3><small>در انتظار تأیید</small></div>
+    <div class="stat"><h3>{{ total_patients }}</h3><small>بیماران</small></div>
+    <div class="stat"><h3>{{ total_revenue }}</h3><small>درآمد کل</small></div>
+</div>
+
+<div class="card" style="padding:20px; margin-top:24px;">
+    <h3>آخرین سفارش‌ها</h3>
+    <table>
+        <tr><th>کد رهگیری</th><th>بیمار</th><th>مبلغ</th><th>وضعیت</th></tr>
+        {% for order in recent_orders %}
+        <tr>
+            <td>{{ order.tracking_code }}</td>
+            <td>{{ order.patient.first_name }} {{ order.patient.last_name }}</td>
+            <td>{{ order.total_price }}</td>
+            <td>{{ order.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">سفارشی وجود ندارد.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

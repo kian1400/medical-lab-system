@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}سفارش‌ها | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<h2 class="page-title">سوابق سفارش‌ها</h2>
+<div class="card" style="padding:20px;">
+    <table>
+        <tr><th>کد رهگیری</th><th>تاریخ</th><th>کل مبلغ</th><th>وضعیت</th><th>جزئیات</th></tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.tracking_code }}</td>
+            <td>{{ order.registered_at|date:'Y/m/d' }}</td>
+            <td>{{ order.total_price }} تومان</td>
+            <td>{{ order.get_status_display }}</td>
+            <td><a href="{% url 'order_detail' order.tracking_code %}">مشاهده</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">هیچ سفارشی موجود نیست.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

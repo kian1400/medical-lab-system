@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}ورود | آزمایشگاه مهر{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto; padding: 30px;">
+    <h2 class="page-title">ورود به سامانه</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="id_username">نام کاربری</label>
+            {{ form.username }}
+        </div>
+        <div>
+            <label for="id_password">رمز عبور</label>
+            {{ form.password }}
+        </div>
+        <button class="btn" type="submit">ورود</button>
+    </form>
+    <p class="muted">هنوز ثبت‌نام نکرده‌اید؟ <a href="{% url 'register' %}">اینجا ثبت‌نام کنید</a></p>
+</div>
+{% endblock %}
