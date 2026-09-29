@@ -1,3 +1,5 @@
+import csv
+import json
 import secrets
 from io import BytesIO
 
@@ -6,7 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.http import HttpResponse
+from django.db.models import Count, Q, Sum
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from reportlab.lib import colors
@@ -116,7 +119,7 @@ def patient_profile(request):
         if form.is_valid():
             form.save()
             log_activity(request.user, "update", "Patient", patient.id, "بروزرسانی پروفایل بیمار")
-            messages.success(request, "پروفایل با موفقیت بروزرسانی شد.")
+            messages.success(request, "پروفایل با موفقیت بروزرس��نی شد.")
             return redirect("patient_profile")
     else:
         form = PatientProfileForm(instance=patient)
@@ -355,13 +358,67 @@ def approve_order(request, tracking_code):
     return redirect("order_detail", tracking_code)
 
 
+@login_required
+def admin_reports(request):
+    if not request.user.is_staff:
+        messages.error(request, "دسترسی شما محدود است.")
+        return redirect("home")
+    revenue = Order.objects.filter(is_paid=True).aggregate(total=Sum('total_price'))['total'] or 0
+    stats = {
+        'total_orders': Order.objects.count(),
+        'waiting_approval': Order.objects.filter(status=Order.Status.WAITING_APPROVAL).count(),
+        'approved': Order.objects.filter(status=Order.Status.APPROVED).count(),
+        'patients': Patient.objects.count(),
+        'revenue': revenue,
+    }
+    top_tests = OrderItem.objects.values('test__name').annotate(count=Count('id')).order_by('-count')[:5]
+    recent = Order.objects.select_related('patient').order_by('-registered_at')[:15]
+    return render(request, 'admin/reports.html', {'stats': stats, 'top_tests': top_tests, 'recent': recent})
+
+
+@login_required
+def export_orders_csv(request):
+    if not request.user.is_staff:
+        messages.error(request, "دسترسی شما محدود است.")
+        return redirect("home")
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="orders_report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['کد رهگیری', 'بیمار', 'تاریخ', 'وضعیت', 'جمع کل', 'پرداخت شده'])
+    for order in Order.objects.select_related('patient').order_by('-registered_at'):
+        writer.writerow([
+            order.tracking_code,
+            f"{order.patient.first_name} {order.patient.last_name}",
+            order.registered_at.strftime('%Y/%m/%d %H:%M'),
+            order.get_status_display(),
+            order.total_price,
+            'بله' if order.is_paid else 'خیر',
+        ])
+    return response
+
+
+@login_required
+def api_order_status(request, tracking_code):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+    order = get_object_or_404(Order, tracking_code=tracking_code)
+    return JsonResponse({
+        'tracking_code': order.tracking_code,
+        'status': order.status,
+        'status_label': order.get_status_display(),
+        'is_paid': order.is_paid,
+        'total_price': str(order.total_price),
+        'patient': f"{order.patient.first_name} {order.patient.last_name}",
+    })
+
+
 def api_tests(request):
     data = [{
-        "id": test.id,
-        "code": test.code,
-        "name": test.name,
-        "category": test.category,
-        "price": int(test.final_price()),
-        "sample_type": test.sample_type,
+        'id': test.id,
+        'code': test.code,
+        'name': test.name,
+        'category': test.category,
+        'price': int(test.final_price()),
+        'sample_type': test.sample_type,
     } for test in Test.objects.filter(is_active=True)]
-    return HttpResponse(__import__("json").dumps(data), content_type="application/json")
+    return JsonResponse({'results': data})

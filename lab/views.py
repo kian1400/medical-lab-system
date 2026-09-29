@@ -1,59 +1,74 @@
-from django import forms
-from django.contrib.auth.models import User
-from .models import Patient, Order, Test, Appointment
+import csv
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.db.models import Count, Sum
+from django.utils import timezone
 
-class PatientRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, label="رمز عبور")
-    password_confirm = forms.CharField(widget=forms.PasswordInput, label="تکرار رمز عبور")
-    email = forms.EmailField(label="ایمیل")
+from .models import Order, Patient, Test
 
-    class Meta:
-        model = Patient
-        fields = ["first_name", "last_name", "national_id", "birth_date", "gender", "phone", "email", "address", "city"]
-        labels = {
-            "first_name": "نام", "last_name": "نام خانوادگی", "national_id": "کد ملی",
-            "birth_date": "تاریخ تولد", "gender": "جنسیت", "phone": "موبایل",
-            "email": "ایمیل", "address": "نشانی", "city": "شهر"
-        }
-        widgets = {"birth_date": forms.DateInput(attrs={"type": "date"})}
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
-        if password != password_confirm:
-            raise forms.ValidationError("رمزهای عبور مطابقت ندارند.")
-        return cleaned_data
+@login_required
+def admin_reports(request):
+    if not request.user.is_staff:
+        messages.error(request, "دسترسی شما محدود است.")
+        return redirect("home")
 
-class PatientProfileForm(forms.ModelForm):
-    class Meta:
-        model = Patient
-        fields = ["first_name", "last_name", "birth_date", "gender", "phone", "email", "address", "city", "emergency_contact", "insurance_number"]
-        labels = {
-            "first_name": "نام", "last_name": "نام خانوادگی", "birth_date": "تاریخ تولد",
-            "gender": "جنسیت", "phone": "موبایل", "email": "ایمیل",
-            "address": "نشانی", "city": "شهر", "emergency_contact": "تماس اضطراری", "insurance_number": "شماره بیمه"
-        }
-        widgets = {"birth_date": forms.DateInput(attrs={"type": "date"})}
+    revenue = Order.objects.filter(is_paid=True).aggregate(total=Sum('total_price'))['total'] or 0
+    counts = Order.objects.aggregate(
+        total_orders=Count('id'),
+        waiting_approval=Count('id', filter=models.Q(status=Order.Status.WAITING_APPROVAL)),
+        approved=Count('id', filter=models.Q(status=Order.Status.APPROVED)),
+    )
+    top_tests = (
+        Order.objects.filter(items__isnull=False)
+        .values('items__test__name')
+        .annotate(total=Count('items__test__name'))
+        .order_by('-total')[:5]
+    )
+    recent = Order.objects.select_related('patient').order_by('-registered_at')[:15]
+    return render(request, 'admin/reports.html', {
+        'revenue': revenue,
+        'counts': counts,
+        'top_tests': top_tests,
+        'recent': recent,
+        'today': timezone.localdate(),
+    })
 
-class LoginForm(forms.Form):
-    username = forms.CharField(label="نام کاربری", max_length=150)
-    password = forms.CharField(label="رمز عبور", widget=forms.PasswordInput)
 
-class NewOrderForm(forms.ModelForm):
-    tests = forms.ModelMultipleChoiceField(queryset=Test.objects.filter(is_active=True), label="آزمایش‌ها", widget=forms.CheckboxSelectMultiple)
+@login_required
+def export_orders_csv(request):
+    if not request.user.is_staff:
+        messages.error(request, "دسترسی شما محدود است.")
+        return redirect("home")
 
-    class Meta:
-        model = Order
-        fields = ["order_type", "notes"]
-        labels = {"order_type": "نوع سفارش", "notes": "یادداشت"}
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="lab_orders_report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['کد رهگیری', 'بیمار', 'تاریخ ثبت', 'وضعیت', 'جمع کل', 'پرداخت'])
+    for order in Order.objects.select_related('patient').order_by('-registered_at'):
+        writer.writerow([
+            order.tracking_code,
+            f"{order.patient.first_name} {order.patient.last_name}",
+            order.registered_at.strftime('%Y/%m/%d %H:%M'),
+            order.get_status_display(),
+            order.total_price,
+            'بله' if order.is_paid else 'خیر',
+        ])
+    return response
 
-class AppointmentBookingForm(forms.ModelForm):
-    class Meta:
-        model = Appointment
-        fields = ["appointment_date", "appointment_time", "notes"]
-        labels = {"appointment_date": "تاریخ", "appointment_time": "ساعت", "notes": "یادداشت"}
-        widgets = {
-            "appointment_date": forms.DateInput(attrs={"type": "date"}),
-            "appointment_time": forms.TimeInput(attrs={"type": "time"})
-        }
+
+@login_required
+def api_order_status(request, tracking_code):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+    order = get_object_or_404(Order, tracking_code=tracking_code)
+    return JsonResponse({
+        'tracking_code': order.tracking_code,
+        'status': order.status,
+        'status_label': order.get_status_display(),
+        'is_paid': order.is_paid,
+        'total_price': str(order.total_price),
+        'patient': f"{order.patient.first_name} {order.patient.last_name}",
+    })
