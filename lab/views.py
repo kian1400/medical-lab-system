@@ -54,8 +54,14 @@ def approve_order(request, tracking_code):
         messages.error(request, "فقط مسئول فنی مجاز به تأیید نتیجه است.")
         return redirect("lab:order_detail", tracking_code)
     if request.method == "POST":
-        order.status, order.approved_by, order.approved_at = Order.Status.APPROVED, request.user, timezone.now()
-        order.items.filter(result__isnull=False).update(result__verified=True)
-        order.save(update_fields=["status", "approved_by", "approved_at"])
+        with transaction.atomic():
+            order.status = Order.Status.APPROVED
+            order.approved_by = request.user
+            order.approved_at = timezone.now()
+            order.save(update_fields=["status", "approved_by", "approved_at"])
+            
+            # تأیید تمام نتایج
+            Result.objects.filter(item__order=order, verified=False).update(verified=True)
+        
         messages.success(request, "نتیجه با موفقیت تأیید شد.")
     return redirect("lab:order_detail", tracking_code)
